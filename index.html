@@ -2,33 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" href="img/flowers.png" type="image/x-icon">
-    <title>Flowers</title>
+    <title>Happy Birthday Aleya</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="greetings">
-    <!-- silahkan menambah kata sesuai keinginan dengan <span>text...</span -->
-        <span>Hallo Aleya!</span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
+    <div id="welcome-screen">
+        <h1>Happy Birthday, Aleya!</h1>
+        <button onclick="startBirthday()">Click to Begin</button>
     </div>
-    <div class="description">
-        <span>Hari ini kan hari valentine, jadi aku mau ucapin Happy Valentines ke kamuu 😁 I hope we get to stay together and still love each other. Aku juga ada hadiah buat kamu lhoo.. klik tombol dibawah</span>
+
+    <div id="birthday-content" class="hidden">
+        <h2>🎉 Happy Birthday, Aleya! 🎂</h2>
+        <p>You are the most special person in my life, and I hope this day brings you as much joy as you bring to me!</p>
+        <button onclick="showSurprise()">Click for a Surprise!</button>
+        <div id="confetti-container"></div>
     </div>
-    <div class="button">
-        <button>
-            <a href="flower.html">For my Aleya</a>
-        </button>
-        
-    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
