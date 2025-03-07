@@ -48,10 +48,10 @@ button:hover {
     transform: scale(1.05);
 }
 
-/* Hide surprise content initially */
 #surprise-container {
-    display: none;
+    display: none; /* Hidden initially */
     margin-top: 20px;
+    text-align: center; /* Centers content */
 }
 
 #love-message {
@@ -61,8 +61,11 @@ button:hover {
     animation: fadeIn 2s ease-in-out;
 }
 
+/* Fix image size */
 #love-image {
-    width: 300px;
+    width: 300px; /* Adjust width */
+    max-width: 80%; /* Prevents it from being too large */
+    height: auto; /* Keeps aspect ratio */
     border-radius: 15px;
     margin-top: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
