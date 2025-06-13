@@ -83,8 +83,7 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
         video: { 
           width: 640, 
           height: 480,
-          facingMode: 'environment', // Use back camera for better trash detection
-          torch: flashEnabled // Enable flash if supported
+          facingMode: 'environment' // Use back camera for better trash detection
         } 
       };
       
@@ -96,12 +95,19 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
         setIsCameraActive(true);
         console.log('Camera started successfully');
         
-        // Enable flash if supported
+        // Enable flash if supported and requested
         if (flashEnabled) {
           const track = stream.getVideoTracks()[0];
-          if (track.getCapabilities && track.getCapabilities().torch) {
-            await track.applyConstraints({ advanced: [{ torch: true }] });
-            console.log('Flash enabled');
+          const capabilities = track.getCapabilities() as any;
+          if (capabilities.torch) {
+            try {
+              await track.applyConstraints({ 
+                advanced: [{ torch: true } as any] 
+              });
+              console.log('Flash enabled');
+            } catch (err) {
+              console.warn('Flash not supported or failed to enable:', err);
+            }
           }
         }
       }
@@ -183,9 +189,7 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
         features[featureIndex++] = Math.min(1.0, b * enhancementFactor);
       }
       
-      // REPLACE THIS WITH YOUR ACTUAL EDGE IMPULSE MODEL CALL:
-      // const result = await modelRef.current.classify(features);
-      
+      // ========== REPLACE THIS SECTION WITH YOUR EDGE IMPULSE MODEL ==========
       // For now, using a simulation that detects bright areas (simulating trash detection)
       let trashDetected = false;
       let maxConfidence = 0;
@@ -201,17 +205,25 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
       
       // TODO: Replace above simulation with actual Edge Impulse model call:
       /*
+      ========== REPLACE THE SIMULATION ABOVE WITH THIS: ==========
+      
       if (modelRef.current && modelRef.current.classify) {
         const result = await modelRef.current.classify(features);
+        console.log('Edge Impulse result:', result);
+        
         if (result && result.classification) {
-          const trashClass = result.classification['trash']; // Adjust based on your model's output
+          // Adjust 'trash' to match your model's class name
+          const trashClass = result.classification['trash']; 
           if (trashClass && trashClass.value > 0.6) { // Adjust threshold as needed
             trashDetected = true;
             maxConfidence = trashClass.value;
           }
         }
       }
+      
+      ========== END REPLACEMENT SECTION ==========
       */
+      // ========== END SECTION TO REPLACE ==========
       
       setConfidence(maxConfidence);
       
@@ -255,9 +267,10 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
       const track = stream.getVideoTracks()[0];
       
       try {
-        if (track.getCapabilities && track.getCapabilities().torch) {
+        const capabilities = track.getCapabilities() as any;
+        if (capabilities.torch) {
           await track.applyConstraints({ 
-            advanced: [{ torch: !flashEnabled }] 
+            advanced: [{ torch: !flashEnabled } as any] 
           });
           setFlashEnabled(!flashEnabled);
           console.log(`Flash ${!flashEnabled ? 'enabled' : 'disabled'}`);
