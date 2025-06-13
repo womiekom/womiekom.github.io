@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -153,7 +152,7 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
     }
   };
 
-  // Process video frame with Edge Impulse - REPLACE THIS SECTION WITH YOUR MODEL
+  // Process video frame with Edge Impulse
   const processFrame = async () => {
     if (!videoRef.current || !canvasRef.current || !isModelLoaded || !modelRef.current) return;
 
@@ -189,41 +188,23 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
         features[featureIndex++] = Math.min(1.0, b * enhancementFactor);
       }
       
-      // ========== REPLACE THIS SECTION WITH YOUR EDGE IMPULSE MODEL ==========
-      // For now, using a simulation that detects bright areas (simulating trash detection)
+      // Use actual Edge Impulse model
       let trashDetected = false;
       let maxConfidence = 0;
-      
-      // Simple bright area detection (replace with your model)
-      const brightPixels = features.filter(value => value > 0.8).length;
-      const brightPixelRatio = brightPixels / features.length;
-      
-      if (brightPixelRatio > 0.1) { // If more than 10% of pixels are bright
-        trashDetected = true;
-        maxConfidence = Math.min(0.95, brightPixelRatio * 5); // Convert to confidence score
-      }
-      
-      // TODO: Replace above simulation with actual Edge Impulse model call:
-      /*
-      ========== REPLACE THE SIMULATION ABOVE WITH THIS: ==========
       
       if (modelRef.current && modelRef.current.classify) {
         const result = await modelRef.current.classify(features);
         console.log('Edge Impulse result:', result);
         
         if (result && result.classification) {
-          // Adjust 'trash' to match your model's class name
-          const trashClass = result.classification['trash']; 
-          if (trashClass && trashClass.value > 0.6) { // Adjust threshold as needed
+          // Use your model's class name "Trash"
+          const trashClass = result.classification['Trash']; 
+          if (trashClass && trashClass.value > 0.6) { // 60% confidence threshold
             trashDetected = true;
             maxConfidence = trashClass.value;
           }
         }
       }
-      
-      ========== END REPLACEMENT SECTION ==========
-      */
-      // ========== END SECTION TO REPLACE ==========
       
       setConfidence(maxConfidence);
       
