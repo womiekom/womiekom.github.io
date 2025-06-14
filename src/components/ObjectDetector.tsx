@@ -36,7 +36,7 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
     setModelError(error);
   };
 
-  const { isDetecting, toggleDetection } = useDetectionLoop({
+  const { isDetecting, toggleDetection, stopDetection } = useDetectionLoop({
     videoRef,
     canvasRef,
     isModelLoaded,
@@ -48,7 +48,7 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
 
   const handleStopCamera = () => {
     stopCamera();
-    setIsDetecting(false);
+    stopDetection();
   };
 
   const error = modelError || cameraError;

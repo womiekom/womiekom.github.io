@@ -79,12 +79,16 @@ export const useDetectionLoop = ({
     }
   };
 
+  const stopDetection = () => {
+    setIsDetecting(false);
+    if (detectionLoopRef.current) {
+      cancelAnimationFrame(detectionLoopRef.current);
+    }
+  };
+
   const toggleDetection = () => {
     if (isDetecting) {
-      setIsDetecting(false);
-      if (detectionLoopRef.current) {
-        cancelAnimationFrame(detectionLoopRef.current);
-      }
+      stopDetection();
     } else {
       setIsDetecting(true);
       const detect = () => {
@@ -99,6 +103,7 @@ export const useDetectionLoop = ({
 
   return {
     isDetecting,
-    toggleDetection
+    toggleDetection,
+    stopDetection
   };
 };
