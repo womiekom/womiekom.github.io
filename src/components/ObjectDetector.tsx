@@ -8,7 +8,6 @@ import { useAudioManagement } from '@/hooks/useAudioManagement';
 import { useDetectionLoop } from '@/hooks/useDetectionLoop';
 import CameraView from './CameraView';
 import DetectionStatus from './DetectionStatus';
-import SetupInstructions from './SetupInstructions';
 
 interface ObjectDetectorProps {
   wasmUrl?: string;
@@ -58,7 +57,7 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
       <div className="text-center">
         <h1 className="text-3xl font-bold mb-2">🗑️ Trash Detection System</h1>
         <p className="text-muted-foreground">
-          AI-powered trash detection using your trained Edge Impulse model
+          Object detection system for identifying trash
         </p>
       </div>
 
@@ -91,8 +90,6 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
           onToggleSound={() => setSoundEnabled(!soundEnabled)}
         />
       </div>
-
-      <SetupInstructions />
     </div>
   );
 };
