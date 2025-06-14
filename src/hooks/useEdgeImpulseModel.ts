@@ -35,15 +35,18 @@ export const useEdgeImpulseModel = ({ wasmUrl, jsUrl }: UseEdgeImpulseModelProps
               // @ts-ignore
               const Module = window.Module;
               
-              // Create a simple mock model for testing
+              // Create a mock model with both Trash and Not trash classes
               const mockModel = {
                 classify: async (features: Float32Array) => {
-                  // Simple mock classification - randomly detect trash 30% of the time
+                  // Simple mock classification - randomly decide between trash/not trash
                   const isTrash = Math.random() > 0.7;
                   return {
                     classification: {
                       'Trash': {
                         value: isTrash ? 0.8 : 0.2
+                      },
+                      'Not trash': {
+                        value: isTrash ? 0.2 : 0.8
                       }
                     }
                   };
@@ -63,6 +66,9 @@ export const useEdgeImpulseModel = ({ wasmUrl, jsUrl }: UseEdgeImpulseModelProps
                     classification: {
                       'Trash': {
                         value: isTrash ? 0.8 : 0.2
+                      },
+                      'Not trash': {
+                        value: isTrash ? 0.2 : 0.8
                       }
                     }
                   };
@@ -83,6 +89,9 @@ export const useEdgeImpulseModel = ({ wasmUrl, jsUrl }: UseEdgeImpulseModelProps
                 classification: {
                   'Trash': {
                     value: isTrash ? 0.8 : 0.2
+                  },
+                  'Not trash': {
+                    value: isTrash ? 0.2 : 0.8
                   }
                 }
               };
@@ -105,6 +114,9 @@ export const useEdgeImpulseModel = ({ wasmUrl, jsUrl }: UseEdgeImpulseModelProps
               classification: {
                 'Trash': {
                   value: isTrash ? 0.8 : 0.2
+                },
+                'Not trash': {
+                  value: isTrash ? 0.2 : 0.8
                 }
               }
             };
@@ -127,6 +139,9 @@ export const useEdgeImpulseModel = ({ wasmUrl, jsUrl }: UseEdgeImpulseModelProps
             classification: {
               'Trash': {
                 value: isTrash ? 0.8 : 0.2
+              },
+              'Not trash': {
+                value: isTrash ? 0.2 : 0.8
               }
             }
           };

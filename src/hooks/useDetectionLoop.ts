@@ -58,8 +58,19 @@ export const useDetectionLoop = ({
         console.log('Edge Impulse result:', result);
         
         if (result && result.classification) {
-          const trashClass = result.classification['Trash']; 
-          if (trashClass && trashClass.value > 0.6) {
+          const trashClass = result.classification['Trash'];
+          const notTrashClass = result.classification['Not trash'];
+          
+          if (trashClass && notTrashClass) {
+            // Compare both classes and use the one with higher confidence
+            if (trashClass.value > notTrashClass.value && trashClass.value > 0.6) {
+              trashDetected = true;
+              maxConfidence = trashClass.value;
+            } else {
+              maxConfidence = Math.max(trashClass.value, notTrashClass.value);
+            }
+          } else if (trashClass && trashClass.value > 0.6) {
+            // Fallback if only Trash class is present
             trashDetected = true;
             maxConfidence = trashClass.value;
           }
