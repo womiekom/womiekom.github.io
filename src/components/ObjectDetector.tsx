@@ -1,7 +1,8 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Camera, AlertTriangle, Volume2, VolumeX, Flashlight } from 'lucide-react';
+import { Camera, AlertTriangle, Volume2, VolumeX } from 'lucide-react';
 
 interface ObjectDetectorProps {
   wasmUrl?: string;
@@ -19,7 +20,6 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [detectionResult, setDetectionResult] = useState<string>('');
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [flashEnabled, setFlashEnabled] = useState(false);
   const [confidence, setConfidence] = useState(0);
   const [error, setError] = useState<string>('');
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -74,7 +74,7 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
     }
   };
 
-  // Start camera with flash support
+  // Start camera
   const startCamera = async () => {
     try {
       setError('');
@@ -82,7 +82,7 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
         video: { 
           width: 640, 
           height: 480,
-          facingMode: 'environment' // Use back camera for better trash detection
+          facingMode: 'environment' // Use back camera
         } 
       };
       
@@ -93,22 +93,6 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
         await videoRef.current.play();
         setIsCameraActive(true);
         console.log('Camera started successfully');
-        
-        // Enable flash if supported and requested
-        if (flashEnabled) {
-          const track = stream.getVideoTracks()[0];
-          const capabilities = track.getCapabilities() as any;
-          if (capabilities.torch) {
-            try {
-              await track.applyConstraints({ 
-                advanced: [{ torch: true } as any] 
-              });
-              console.log('Flash enabled');
-            } catch (err) {
-              console.warn('Flash not supported or failed to enable:', err);
-            }
-          }
-        }
       }
     } catch (err) {
       setError('Failed to access camera. Please ensure camera permissions are granted.');
@@ -174,18 +158,14 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
       let featureIndex = 0;
       
       for (let i = 0; i < imageData.data.length; i += 4) {
-        // Normalize RGB values to 0-1 range and enhance contrast for flash detection
+        // Normalize RGB values to 0-1 range
         const r = imageData.data[i] / 255.0;
         const g = imageData.data[i + 1] / 255.0;
         const b = imageData.data[i + 2] / 255.0;
         
-        // Enhance bright areas (where flash illuminates trash)
-        const brightness = (r + g + b) / 3;
-        const enhancementFactor = brightness > 0.7 ? 1.2 : 1.0;
-        
-        features[featureIndex++] = Math.min(1.0, r * enhancementFactor);
-        features[featureIndex++] = Math.min(1.0, g * enhancementFactor);
-        features[featureIndex++] = Math.min(1.0, b * enhancementFactor);
+        features[featureIndex++] = r;
+        features[featureIndex++] = g;
+        features[featureIndex++] = b;
       }
       
       // Use actual Edge Impulse model
@@ -241,30 +221,6 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
     }
   };
 
-  // Toggle flash
-  const toggleFlash = async () => {
-    if (isCameraActive && videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      const track = stream.getVideoTracks()[0];
-      
-      try {
-        const capabilities = track.getCapabilities() as any;
-        if (capabilities.torch) {
-          await track.applyConstraints({ 
-            advanced: [{ torch: !flashEnabled } as any] 
-          });
-          setFlashEnabled(!flashEnabled);
-          console.log(`Flash ${!flashEnabled ? 'enabled' : 'disabled'}`);
-        } else {
-          setError('Flash not supported on this device');
-        }
-      } catch (err) {
-        console.error('Flash toggle error:', err);
-        setError('Failed to toggle flash');
-      }
-    }
-  };
-
   // Load model on component mount
   useEffect(() => {
     loadModel();
@@ -273,9 +229,9 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold mb-2">🗑️ Under-Table Trash Detection</h1>
+        <h1 className="text-3xl font-bold mb-2">🗑️ Trash Detection System</h1>
         <p className="text-muted-foreground">
-          Position phone on right side, facing left under table with flash enabled
+          AI-powered trash detection using your trained Edge Impulse model
         </p>
       </div>
 
@@ -291,13 +247,13 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
         <div className="space-y-4">
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <Camera className="h-5 w-5" />
-            Under-Table Camera View
+            Camera View
           </h2>
           
           <div className="relative bg-muted rounded-lg overflow-hidden">
             <video
               ref={videoRef}
-              className="w-full h-64 object-cover transform -scale-x-100" // Mirror for better UX
+              className="w-full h-64 object-cover"
               playsInline
               muted
             />
@@ -309,13 +265,6 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
             {!isCameraActive && (
               <div className="absolute inset-0 flex items-center justify-center bg-muted/80">
                 <p className="text-muted-foreground">Camera not started</p>
-              </div>
-            )}
-
-            {/* Flash indicator */}
-            {flashEnabled && isCameraActive && (
-              <div className="absolute top-2 right-2 bg-yellow-500 text-white p-1 rounded">
-                <Flashlight className="h-4 w-4" />
               </div>
             )}
           </div>
@@ -334,15 +283,6 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
               variant={isDetecting ? "destructive" : "default"}
             >
               {isDetecting ? "Stop Detection" : "Start Detection"}
-            </Button>
-
-            <Button
-              onClick={toggleFlash}
-              disabled={!isCameraActive}
-              variant={flashEnabled ? "secondary" : "outline"}
-            >
-              <Flashlight className="h-4 w-4 mr-2" />
-              Flash {flashEnabled ? "ON" : "OFF"}
             </Button>
           </div>
         </div>
@@ -370,13 +310,6 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
               <span>Detection Status:</span>
               <span className={`font-medium ${isDetecting ? 'text-green-600' : 'text-muted-foreground'}`}>
                 {isDetecting ? 'Scanning...' : 'Stopped'}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between p-3 border rounded-lg">
-              <span>Flash Status:</span>
-              <span className={`font-medium ${flashEnabled ? 'text-yellow-600' : 'text-muted-foreground'}`}>
-                {flashEnabled ? 'ON' : 'OFF'}
               </span>
             </div>
             
@@ -419,15 +352,11 @@ const ObjectDetector: React.FC<ObjectDetectorProps> = ({
       <div className="text-sm text-muted-foreground bg-blue-50 p-4 rounded-lg">
         <p><strong>Setup Instructions:</strong></p>
         <ol className="list-decimal list-inside space-y-1 mt-2">
-          <li>Upload your Edge Impulse files to the public folder</li>
-          <li>Position phone on the RIGHT side of table</li>
-          <li>Point camera LEFT towards under-table area</li>
-          <li>Enable flash for better trash visibility</li>
-          <li>Start detection - system will alert when trash is found</li>
+          <li>Upload your Edge Impulse files (edge-impulse-standalone.js and .wasm) to the public folder</li>
+          <li>Start the camera and begin detection</li>
+          <li>The system will automatically detect trash using your trained model</li>
+          <li>Audio alerts will play when trash is detected (can be toggled off)</li>
         </ol>
-        
-        <p className="mt-3"><strong>⚠️ Code Integration Needed:</strong></p>
-        <p>Replace the simulation in <code>processFrame()</code> with your actual Edge Impulse model calls. Look for the TODO comment in the code.</p>
       </div>
     </div>
   );
